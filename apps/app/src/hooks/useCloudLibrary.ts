@@ -43,6 +43,8 @@ export function useCloudLibrary() {
       if (cancelled) return;
 
       const push = async () => {
+        // Sign-out empties the device library; that must never be pushed as a mass delete.
+        if (useAccount.getState().profile?.id !== userId) return;
         const next = useTrackr.getState().items;
         const { upserts, deletes } = diffLibraries(synced, next);
         try {
