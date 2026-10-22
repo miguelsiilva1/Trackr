@@ -11,5 +11,6 @@ export * from './sync/reconcile';
 export * from './sync/csv';
 export * from './mocks/library';
 export * from './mocks/social';
+export * from './mocks/artwork';
 export * from './cloud/library';
 export * from './catalog/details';

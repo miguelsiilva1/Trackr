@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
+import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { ArrowLeft, ImageIcon, RefreshCw, Star, Trash2 } from 'lucide-react-native';
+import { ArrowLeft, ImageIcon, RefreshCw, Trash2 } from 'lucide-react-native';
 import {
   MEDIA_STATUSES, PROVIDERS, STATUS_HEX, backdropOf, statusLabel, summaryOf, tDuration, tGenre,
   type ProviderId, type TrackrItem,
@@ -22,6 +23,7 @@ import { Kicker, Txt } from '@/components/Txt';
 import { SeasonsSection } from './SeasonsSection';
 import { AchievementsSection } from './AchievementsSection';
 import { ArtworkSheet } from './ArtworkSheet';
+import { RatingsCard } from './RatingsCard';
 
 function Fact({ label, children }: { label: string; children: React.ReactNode }) {
   return (
@@ -61,10 +63,11 @@ export function ItemScreen({ id }: { id: string }) {
   }
 
   const m = MEDIA_CLASSES[item.type];
-  const banner = backdropOf(item);
+  // Real banner, Letterboxd-style: custom > title's own > first one the provider offers. Never a blurred poster.
+  const banner = backdropOf(item) || details?.artwork.backdrops[0];
   const links = Object.keys(item.links ?? {}) as ProviderId[];
   const update = (patch: Partial<TrackrItem>) => updateItem(item.id, patch);
-  const heroH = wide ? 440 : 280;
+  const heroH = wide ? 520 : 240;
   const posterW = wide ? 220 : 116;
 
   const typeSection = !details ? (
@@ -76,7 +79,7 @@ export function ItemScreen({ id }: { id: string }) {
     <>
       {details.seasons?.length ? <SeasonsSection item={item} seasons={details.seasons} onChange={update} /> : null}
       {details.achievements?.length ? <AchievementsSection item={item} achievements={details.achievements} onChange={update} /> : null}
-      {details.source === 'mock' && item.type !== 'movie' && (
+      {details.source === 'mock' && item.type !== 'movie' && !details.achievements?.[0]?.image && (
         <Txt className="text-xs text-subtle">{t('sample_data', { s: item.type === 'game' ? 'RAWG' : 'TMDB' })}</Txt>
       )}
     </>
@@ -96,16 +99,9 @@ export function ItemScreen({ id }: { id: string }) {
             </View>
           </Fact>
         )}
-        {item.rating > 0 && (
-          <Fact label={t('community')}>
-            <View className="flex-row items-center gap-1.5">
-              <Star size={14} color="#facc15" fill="#facc15" />
-              <Txt className="text-sm font-semibold">{item.rating.toFixed(1)}</Txt>
-              <Txt className="text-sm text-subtle">/ 5</Txt>
-            </View>
-          </Fact>
-        )}
       </Card>
+
+      {item.rating > 0 && <RatingsCard item={item} />}
 
       <Card className="gap-2">
         <Kicker>{t('notes')}</Kicker>
@@ -146,10 +142,15 @@ export function ItemScreen({ id }: { id: string }) {
   return (
     <View className="flex-1 bg-app">
       <ScrollView contentContainerStyle={{ paddingBottom: 64 }}>
-        <View style={{ height: heroH }}>
-          <Poster item={item} src={banner} blur={banner ? 0 : 24} />
-          <LinearGradient colors={['rgba(0,0,0,0.35)', 'transparent', colors.bg]} locations={[0, 0.35, 1]} style={StyleSheet.absoluteFill} />
-          {wide && <LinearGradient colors={[colors.bg, 'transparent']} start={{ x: 0, y: 0 }} end={{ x: 0.6, y: 0 }} style={{ position: 'absolute', top: 0, bottom: 0, left: 0, width: '50%' }} />}
+        <View style={{ height: heroH, maxWidth: 1440 }} className="w-full self-center overflow-hidden">
+          {banner ? <Image source={banner} contentFit="cover" contentPosition="top" transition={200} style={StyleSheet.absoluteFill} /> : <View className={`absolute inset-0 ${m.soft}`} />}
+          <LinearGradient colors={['rgba(0,0,0,0.35)', 'transparent', 'transparent', colors.bg]} locations={[0, 0.3, 0.55, 1]} style={StyleSheet.absoluteFill} />
+          {wide && (
+            <>
+              <LinearGradient colors={[colors.bg, 'transparent']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={{ position: 'absolute', top: 0, bottom: 0, left: 0, width: 160 }} />
+              <LinearGradient colors={['transparent', colors.bg]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={{ position: 'absolute', top: 0, bottom: 0, right: 0, width: 160 }} />
+            </>
+          )}
         </View>
 
         <View className="w-full self-center" style={{ maxWidth: 1200, paddingHorizontal: wide ? 32 : 16, marginTop: -(wide ? 220 : 120) }}>

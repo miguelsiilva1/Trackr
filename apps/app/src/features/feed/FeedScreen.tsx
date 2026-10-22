@@ -4,7 +4,7 @@ import { router } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Flame, Globe, Users } from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
-import { FRIENDS, formatAgo, libKey, type FeedEntry, type Reaction, type StrKey } from '@trackr/core';
+import { FRIENDS, backdropOf, formatAgo, libKey, type FeedEntry, type Reaction, type StrKey } from '@trackr/core';
 import { useApp } from '@/providers/AppProviders';
 import { useTrackr } from '@/store/useTrackr';
 import { useBreakpoint } from '@/hooks/useBreakpoint';
@@ -41,7 +41,7 @@ function ReactionButton({ entry, r }: { entry: FeedEntry; r: Reaction }) {
   );
 }
 
-/** One activity: who did what, then the title as a banner made from its poster. */
+/** One activity: who did what, then the title as a banner with its poster. */
 function FeedCard({ f }: { f: FeedEntry }) {
   const { t, lang } = useApp();
   const me = useTrackr(s => s.me);
@@ -63,7 +63,7 @@ function FeedCard({ f }: { f: FeedEntry }) {
       </View>
 
       <Pressable onPress={openItem} disabled={!openItem} className="mx-4 rounded-xl overflow-hidden active:opacity-80" style={{ height: 150 }}>
-        <Poster item={f.item} blur={28} />
+        <Poster item={f.item} src={backdropOf(f.item)} />
         <LinearGradient colors={['rgba(8,8,14,0.85)', 'rgba(8,8,14,0.35)']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={{ position: 'absolute', top: 0, bottom: 0, left: 0, right: 0 }} />
         <View className="flex-row items-center gap-4 p-3" style={{ position: 'absolute', top: 0, bottom: 0, left: 0, right: 0 }}>
           <View className="rounded-lg overflow-hidden border border-white/20" style={{ height: '100%', aspectRatio: 2 / 3 }}>

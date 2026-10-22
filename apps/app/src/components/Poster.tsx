@@ -11,8 +11,8 @@ import { Txt } from './Txt';
  * Cover image (the user's custom cover when set) with a branded gradient fallback when the URL is missing or fails.
  * Pass `src` to show another image of the same item, such as a backdrop.
  */
-export function Poster({ item, src, blur = 0 }: {
-  item: Pick<TrackrItem, 'title' | 'type' | 'coverUrl' | 'customCover'>; src?: string; blur?: number;
+export function Poster({ item, src }: {
+  item: Pick<TrackrItem, 'title' | 'type' | 'coverUrl' | 'customCover'>; src?: string;
 }) {
   const uri = src ?? coverOf(item);
   const [failed, setFailed] = useState(false);
@@ -30,7 +30,7 @@ export function Poster({ item, src, blur = 0 }: {
   }
   return (
     <Image
-      source={uri} accessibilityLabel={item.title} contentFit="cover" transition={200} blurRadius={blur}
+      source={uri} accessibilityLabel={item.title} contentFit="cover" transition={200}
       onError={() => setFailed(true)} style={StyleSheet.absoluteFill}
     />
   );

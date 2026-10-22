@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Pressable, View } from 'react-native';
 import { Image } from 'expo-image';
-import { Check, Lock, Trophy } from 'lucide-react-native';
+import { Check, Trophy } from 'lucide-react-native';
 import type { Achievement, TrackrItem } from '@trackr/core';
 import { useApp } from '@/providers/AppProviders';
 import { MEDIA_CLASSES } from '@/theme/tokens';
@@ -11,6 +11,9 @@ import { Txt } from '@/components/Txt';
 type Filter = 'all' | 'unlocked' | 'locked';
 
 const PAGE = 20;
+
+/** Trophy tint by rarity when the source has no icon: gold, silver, bronze. */
+const tierHex = (percent: number) => (percent < 5 ? '#facc15' : percent < 25 ? '#cbd5e1' : '#d97706');
 
 export function AchievementsSection({ item, achievements, onChange }: {
   item: TrackrItem; achievements: Achievement[]; onChange: (patch: Partial<TrackrItem>) => void;
@@ -51,10 +54,10 @@ export function AchievementsSection({ item, achievements, onChange }: {
           const on = unlocked.has(a.id);
           return (
             <Pressable key={a.id} onPress={() => toggle(a.id)} className={`flex-row items-center gap-3 px-4 py-3 ${i ? 'border-t border-line' : ''}`}>
-              <View className={`w-12 h-12 rounded-xl overflow-hidden items-center justify-center ${on ? MEDIA_CLASSES.game.soft : 'bg-surface2'}`}>
+              <View className="w-14 h-14 rounded-xl overflow-hidden items-center justify-center bg-surface2" style={{ opacity: on ? 1 : 0.45 }}>
                 {a.image
-                  ? <Image source={a.image} contentFit="cover" style={{ width: '100%', height: '100%', opacity: on ? 1 : 0.35 }} />
-                  : on ? <Trophy size={20} color={colors.media.game} /> : <Lock size={18} color={colors.subtle} />}
+                  ? <Image source={a.image} contentFit="cover" style={{ width: '100%', height: '100%', filter: on ? undefined : 'grayscale(1)' }} />
+                  : <Trophy size={24} color={tierHex(a.percent)} />}
               </View>
               <View className="flex-1 gap-0.5">
                 <Txt className={`text-sm font-semibold ${on ? '' : 'text-muted'}`}>{a.name}</Txt>

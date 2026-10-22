@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
-  MOCK_LIBRARY, REMOTE_EXTRAS, importCsvFiles, libKey, providerById, reconcile, seedFeed, seedGlobalFeed, seedRemote, zeroReactions,
+  MOCK_LIBRARY, REMOTE_EXTRAS, importCsvFiles, libKey, providerById, reconcile, seedFeed, seedGlobalFeed, seedRemote, withArt, zeroReactions,
   type ApiKeys, type Connection, type FeedEntry, type FeedVerb, type LangPref, type MediaType, type ProviderId,
   type Reaction, type RemoteEntry, type StrKey, type SyncReport, type ThemePref, type TrackrItem, type Vote,
 } from '@trackr/core';
@@ -236,6 +236,17 @@ export const useTrackr = create<TrackrState>()(
     {
       name: 'trackr.store.v1',
       storage: createJSONStorage(() => AsyncStorage),
+      version: 1,
+      // v1: mock titles saved before bundled artwork existed get their real banner.
+      migrate: (state: any, version) => {
+        if (version < 1 && state) {
+          const art = (f: FeedEntry) => ({ ...f, item: withArt([f.item])[0] });
+          state.items = withArt(state.items ?? []);
+          state.feed = (state.feed ?? []).map(art);
+          state.globalFeed = (state.globalFeed ?? []).map(art);
+        }
+        return state;
+      },
       partialize: s => ({
         prefs: s.prefs, me: s.me, keys: s.keys, items: s.items, libraryOwner: s.libraryOwner, feed: s.feed, globalFeed: s.globalFeed, conns: s.conns, remote: s.remote, syncLog: s.syncLog,
       }),

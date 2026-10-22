@@ -2,6 +2,7 @@ import type { ApiKeys, Lang, TrackrItem } from '../domain/types';
 import { normalize } from '../domain/media';
 import { errMsg, fetchJson } from './http';
 import { TMDB_IMG } from './tmdb';
+import { MOCK_ART, MOCK_STEAM_ACHIEVEMENTS } from '../mocks/artwork';
 
 export interface Episode {
   number: number;
@@ -96,12 +97,53 @@ const MOCK_ACHIEVEMENTS: Record<Lang, [string, string][]> = {
 };
 
 export function mockAchievements(item: TrackrItem, lang: Lang): Achievement[] {
+  const steam = MOCK_STEAM_ACHIEVEMENTS[item.title];
+  if (steam) {
+    return steam.list.map(([name, description, percent, icon], i) => ({
+      id: `steam-${i}`, name, description, percent,
+      image: `https://shared.fastly.steamstatic.com/community_assets/images/apps/${steam.appid}/${icon}.jpg`,
+    }));
+  }
   const rnd = seeded(item.title);
   let percent = 92;
   return MOCK_ACHIEVEMENTS[lang].map(([name, description], i) => {
     percent = Math.max(0.8, round2(percent * (0.55 + rnd() * 0.35)));
     return { id: `mock-${i}`, name, description, percent };
   });
+}
+
+/** Community rating spread in half-star buckets (0.5…5), centred on the title's average. */
+export function mockRatingHistogram(item: TrackrItem): { buckets: number[]; total: number } {
+  const rnd = seeded(`${item.title}:ratings`);
+  const mean = item.rating || 3.5;
+  const total = 400 + Math.floor(rnd() * 9000);
+  const weights = Array.from({ length: 10 }, (_, i) => {
+    const d = ((i + 1) / 2 - mean) / 0.75;
+    return Math.exp(-d * d / 2) * (0.85 + rnd() * 0.3);
+  });
+  const sum = weights.reduce((a, b) => a + b, 0);
+  return { buckets: weights.map(w => Math.round((w / sum) * total)), total };
+}
+
+// TVmaze needs no key and has episode stills and ratings, so series get real data without TMDB.
+async function tvmazeDetails(item: TrackrItem): Promise<Pick<ItemDetails, 'seasons' | 'artwork'>> {
+  const hits: any[] = await fetchJson(`https://api.tvmaze.com/search/shows?q=${encodeURIComponent(item.title)}`);
+  const show = (hits.find(h => h.show.premiered?.startsWith(String(item.year))) ?? hits[0])?.show;
+  if (!show) throw new Error('not found');
+  const data = await fetchJson(`https://api.tvmaze.com/shows/${show.id}?embed[]=episodes&embed[]=images`);
+  const seasons = new Map<number, Season>();
+  for (const e of data._embedded?.episodes ?? []) {
+    if (e.type !== 'regular' || e.number == null) continue;
+    const s: Season = seasons.get(e.season) ?? { number: e.season, name: '', year: e.airdate?.slice(0, 4), episodes: [] };
+    s.episodes.push({
+      number: e.number, title: e.name ?? '', airDate: e.airdate || undefined, runtime: e.runtime ?? undefined,
+      rating: round2((e.rating?.average ?? 0) / 2), still: e.image?.medium ?? undefined,
+    });
+    seasons.set(e.season, s);
+  }
+  const images: any[] = data._embedded?.images ?? [];
+  const pick = (type: string) => images.filter(i => i.type === type).map(i => i.resolutions.original.url);
+  return { seasons: [...seasons.values()], artwork: { posters: pick('poster'), backdrops: pick('background') } };
 }
 
 const tmdbLang = (lang: Lang) => (lang === 'pt' ? 'pt-PT' : 'en-US');
@@ -182,7 +224,7 @@ async function rawgArtwork(id: number, key: string): Promise<Artwork> {
 const mockDetails = (item: TrackrItem, lang: Lang, warnings: string[]): ItemDetails => ({
   seasons: item.type === 'series' ? mockSeasons(item) : undefined,
   achievements: item.type === 'game' ? mockAchievements(item, lang) : undefined,
-  artwork: { posters: [], backdrops: [] },
+  artwork: MOCK_ART[item.title] ?? { posters: [], backdrops: [] },
   source: 'mock',
   warnings,
 });
@@ -197,7 +239,10 @@ export async function fetchItemDetails(item: TrackrItem, keys: ApiKeys, lang: La
       const [achievements, artwork] = await Promise.all([rawgAchievements(id, keys.rawg), rawgArtwork(id, keys.rawg)]);
       return { achievements, artwork, source: 'remote', warnings: [] };
     }
-    if (!keys.tmdb) return mockDetails(item, lang, []);
+    if (!keys.tmdb) {
+      if (item.type !== 'series') return mockDetails(item, lang, []);
+      return { ...(await tvmazeDetails(item)), source: 'remote', warnings: [] };
+    }
     const id = await tmdbId(item, keys.tmdb);
     if (!id) return mockDetails(item, lang, ['TMDB: not found']);
     const [seasons, artwork] = await Promise.all([
@@ -206,6 +251,7 @@ export async function fetchItemDetails(item: TrackrItem, keys: ApiKeys, lang: La
     ]);
     return { seasons, artwork, source: 'remote', warnings: [] };
   } catch (e) {
-    return mockDetails(item, lang, [`${item.type === 'game' ? 'RAWG' : 'TMDB'}: ${errMsg(e)}`]);
+    const src = item.type === 'game' ? 'RAWG' : keys.tmdb ? 'TMDB' : 'TVmaze';
+    return mockDetails(item, lang, [`${src}: ${errMsg(e)}`]);
   }
 }

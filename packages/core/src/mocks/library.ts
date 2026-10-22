@@ -1,10 +1,15 @@
 import type { TrackrItem } from '../domain/types';
 import { TMDB_IMG } from '../catalog/tmdb';
+import { MOCK_ART } from './artwork';
 
 const tmdbPoster = (p: string) => `${TMDB_IMG}/w500${p}`;
 const rawgImg = (p: string) => `https://media.rawg.io/media/games/${p}.jpg`;
 
-export const MOCK_LIBRARY: TrackrItem[] = [
+/** Mock titles get their real banner from the bundled artwork. */
+export const withArt = <T extends Pick<TrackrItem, 'title' | 'backdropUrl'>>(items: T[]): T[] =>
+  items.map(i => (i.backdropUrl ? i : { ...i, backdropUrl: MOCK_ART[i.title]?.backdrops[0] }));
+
+export const MOCK_LIBRARY: TrackrItem[] = withArt([
   {
     id: 'm1', apiSource: 'local_mock', title: 'Dune: Part Two', type: 'movie', year: 2024,
     coverUrl: tmdbPoster('/1pdfLvkbY9ohJlCjQH2CZjjYVvJ.jpg'), genres: ['Ficção Científica', 'Aventura'],
@@ -138,10 +143,10 @@ export const MOCK_LIBRARY: TrackrItem[] = [
     summary: 'Geralt de Rívia, caçador de monstros, procura a filha adotiva num mundo aberto devastado pela guerra e perseguido pela Caçada Selvagem.',
     likedByFriends: ['Diogo', 'Sara'], progress: 18, progressTotal: 50,
   },
-];
+]);
 
 /** Extra titles searchable offline (simulates "web" results without API keys). */
-export const MOCK_CATALOG: TrackrItem[] = [
+export const MOCK_CATALOG: TrackrItem[] = withArt([
   {
     id: 'c1', apiSource: 'local_mock', title: 'BioShock Infinite', type: 'game', year: 2013,
     coverUrl: rawgImg('fc1/fc1307a2774506b5bd65d7e8424664a7'), genres: ['Ação', 'Shooter'],
@@ -170,4 +175,4 @@ export const MOCK_CATALOG: TrackrItem[] = [
     summary: 'Uma experiência cooperativa independente no universo de Elden Ring para até três jogadores.',
     likedByFriends: [], progressTotal: 30,
   },
-];
+]);
