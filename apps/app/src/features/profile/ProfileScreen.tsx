@@ -14,6 +14,7 @@ import { Kicker, Txt } from '@/components/Txt';
 import { ProviderCard } from './ProviderCard';
 import { LoginSheet } from './LoginSheet';
 import { ExportSheet } from './ExportSheet';
+import { AccountCard } from './AccountCard';
 
 function PreferencesCard() {
   const { t, colors } = useApp();
@@ -137,6 +138,7 @@ export function ProfileScreen() {
         </View>
 
         <View className="gap-4" style={{ flex: wide ? 1 : undefined }}>
+          <AccountCard />
           <PreferencesCard />
           <ApiKeysCard />
           <SyncLogCard />

@@ -68,4 +68,10 @@ export const en: Record<StrKey, string> = {
   log_title: 'Sync log', sync_result: '{p}: ↓{a} imported · ↻{u} updated · ↑{b} pushed · ⚠{c} conflicts',
   log_empty: "You haven't synced anything yet.", more_soon: 'More connectors soon', more_soon_body: 'Trakt, Backloggd, TV Time, Goodreads… the sync engine is adapter-based.',
   covers: 'Covers', profile_tagline: 'Your tribe, your trackers, one place.',
+  acc_title: 'TRACKR account', acc_off: 'No backend configured: the app only runs on this device.',
+  acc_signed_out: 'Sign in to keep your library in the cloud and join your tribe.', acc_as: 'Signed in as @{u}',
+  acc_signin: 'Sign in', acc_signup: 'Create account', acc_signout: 'Sign out', acc_email: 'Email', acc_password: 'Password',
+  acc_username: 'Username', acc_username_rule: '3 to 20 letters, numbers or _', acc_to_signin: 'Have an account? Sign in',
+  acc_to_signup: 'No account yet? Create one', acc_check_email: 'Confirm the email we sent you, then sign in.',
+  acc_synced: 'Library synced to the cloud', acc_cloud_err: 'Cloud error: {e}',
 };

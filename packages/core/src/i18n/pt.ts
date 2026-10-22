@@ -66,6 +66,12 @@ export const pt = {
   log_title: 'Registo de sync', sync_result: '{p}: ↓{a} importados · ↻{u} atualizados · ↑{b} enviados · ⚠{c} conflitos',
   log_empty: 'Ainda não sincronizaste nada.', more_soon: 'Mais conectores em breve', more_soon_body: 'Trakt, Backloggd, TV Time, Goodreads… o motor de sync é por adaptador.',
   covers: 'Cobre', profile_tagline: 'A tua tribo, os teus trackers, um só sítio.',
+  acc_title: 'Conta TRACKR', acc_off: 'Sem backend configurado: a app corre só neste dispositivo.',
+  acc_signed_out: 'Entra para guardar a biblioteca na cloud e juntares-te à tua tribo.', acc_as: 'Ligado como @{u}',
+  acc_signin: 'Entrar', acc_signup: 'Criar conta', acc_signout: 'Sair', acc_email: 'Email', acc_password: 'Password',
+  acc_username: 'Username', acc_username_rule: '3 a 20 letras, números ou _', acc_to_signin: 'Já tens conta? Entra',
+  acc_to_signup: 'Ainda não tens conta? Cria uma', acc_check_email: 'Confirma o email que te enviámos e depois entra.',
+  acc_synced: 'Biblioteca sincronizada com a cloud', acc_cloud_err: 'Falha na cloud: {e}',
 };
 
 export type StrKey = keyof typeof pt;

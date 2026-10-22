@@ -16,7 +16,8 @@ trackr/
 │  │     │  └─ item/[id].tsx       Modal de detalhe (deep link trackr://item/m1)
 │  │     ├─ features/      UI por funcionalidade (hub, add, detail, match, feed, profile, shell)
 │  │     ├─ components/    Primitivos partilhados (Poster, Sheet, Pill, StarRating…)
-│  │     ├─ store/         Estado global (zustand + persistência AsyncStorage)
+│  │     ├─ store/         Estado global (zustand + AsyncStorage) e conta (useAccount)
+│  │     ├─ services/      Acesso ao Supabase (biblioteca na cloud)
 │  │     ├─ providers/     i18n + tema (variáveis CSS do NativeWind)
 │  │     ├─ hooks/         useMediaSearch, useAutoSync, useBreakpoint, useWebShortcuts
 │  │     ├─ lib/           Ficheiros (files.ts nativo / files.web.ts browser), navegação
@@ -27,6 +28,7 @@ trackr/
 │  ├─ core/                TS puro, sem React: domínio, i18n, adaptadores TMDB/RAWG,
 │  │                       motor de sync (reconcile), CSV, mocks + testes (vitest)
 │  └─ config/              tsconfig base partilhado
+├─ supabase/migrations/    Esquema Postgres + RLS (perfis, amizades, biblioteca, feed, reações, votos)
 └─ docs/
    ├─ ARCHITECTURE.md
    └─ prototype/TrackrApp.tsx   Protótipo original de ficheiro único (referência)
@@ -48,6 +50,20 @@ apps/app ──► packages/core ◄── apps/api
 1. **Catálogo** — `MediaRepository.search` tenta TMDB/RAWG quando há chaves e cai sempre para o mock local em caso de erro, timeout ou CORS.
 2. **Estado** — `useTrackr` (zustand) guarda biblioteca, feed, ligações e preferências. Persiste em AsyncStorage (localStorage na web).
 3. **Sync** — `reconcile()` (em `core`) é uma função pura: recebe biblioteca local, biblioteca remota, ligação e devolve o novo estado de ambos + relatório. Hoje a app corre-a contra um remoto simulado; em produção corre em `apps/api`, que fala com cada serviço através de um `ProviderClient`.
+
+## Backend (Supabase)
+
+Contas, biblioteca na cloud e a parte social vivem no Supabase (Postgres + Auth + Realtime). A API Hono fica para o sync com trackers externos.
+
+- **Sem backend** (`EXPO_PUBLIC_SUPABASE_*` vazios): a app corre só no dispositivo, como antes.
+- **Com backend**: ao entrar, `mergeLibraries()` junta a biblioteca do dispositivo com a da cloud (ganha a versão mais recente de cada título); depois cada alteração local é enviada (`diffLibraries()`).
+- **Permissões**: RLS em todas as tabelas. Cada utilizador vê as suas linhas e as dos amigos aceites (`can_see()`).
+
+Configurar:
+
+1. Criar um projeto em supabase.com.
+2. Correr `supabase/migrations/*.sql` no SQL Editor (ou `supabase db push` com a CLI).
+3. Copiar `apps/app/.env.example` para `apps/app/.env` com o Project URL e a publishable key.
 
 ## Adicionar um novo tracker (Trakt, Backloggd, TV Time…)
 

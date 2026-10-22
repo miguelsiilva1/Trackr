@@ -6,10 +6,12 @@ import { AppProviders, useApp } from '@/providers/AppProviders';
 import { Toast } from '@/components/Toast';
 import { MatchCelebration } from '@/features/match/MatchCelebration';
 import { useAutoSync } from '@/hooks/useAutoSync';
+import { useCloudLibrary } from '@/hooks/useCloudLibrary';
 
 function RootStack() {
   const { theme } = useApp();
   useAutoSync();
+  useCloudLibrary();
   return (
     <>
       <StatusBar style={theme === 'dark' ? 'light' : 'dark'} />
