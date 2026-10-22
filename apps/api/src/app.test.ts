@@ -34,6 +34,11 @@ describe('API', () => {
     expect(second.report).toMatchObject({ pulled: [], updated: [], pushed: [], conflicts: [] });
   });
 
+  it('disables sync in production', async () => {
+    const app = createApp(defaultDeps({ NODE_ENV: 'production' }));
+    expect((await sync(app, 'letterboxd', 'user-1')).status).toBe(503);
+  });
+
   it('returns 501 for Letterboxd until an approved key and client exist', async () => {
     const app = createApp(defaultDeps({ LETTERBOXD_API_KEY: 'k' }));
     expect((await sync(app, 'letterboxd', 'user-1')).status).toBe(501);

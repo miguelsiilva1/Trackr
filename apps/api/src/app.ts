@@ -6,6 +6,8 @@ import { NotImplementedError, type ProviderClient } from './providers/types';
 
 export interface AppDeps {
   clients: Record<ProviderId, ProviderClient>;
+  /** The sync route trusts a client-supplied token, so it only runs outside production. */
+  allowInsecureSync: boolean;
 }
 
 export const defaultDeps = (env: NodeJS.ProcessEnv = process.env): AppDeps => ({
@@ -14,6 +16,7 @@ export const defaultDeps = (env: NodeJS.ProcessEnv = process.env): AppDeps => ({
     serializd: createMockClient('serializd'),
     logg: createMockClient('logg'),
   },
+  allowInsecureSync: env.NODE_ENV !== 'production',
 });
 
 interface SyncBody {
@@ -35,6 +38,7 @@ export function createApp(deps: AppDeps = defaultDeps()) {
    * TODO: replace the bearer token with a TRACKR session mapped to stored provider tokens.
    */
   app.post('/sync/:provider', async c => {
+    if (!deps.allowInsecureSync) return c.json({ error: 'sync disabled until TRACKR sessions exist' }, 503);
     const p = providerById(c.req.param('provider'));
     if (!p) return c.json({ error: 'unknown provider' }, 404);
     const token = c.req.header('authorization')?.replace(/^Bearer\s+/i, '');
