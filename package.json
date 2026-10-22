@@ -1,0 +1,27 @@
+{
+  "name": "trackr",
+  "private": true,
+  "version": "0.1.0",
+  "description": "TRACKR — universal hub for movies, series and games with a social match engine.",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "turbo run dev",
+    "web": "npm run web --workspace @trackr/app",
+    "android": "npm run android --workspace @trackr/app",
+    "ios": "npm run ios --workspace @trackr/app",
+    "api": "npm run dev --workspace @trackr/api",
+    "typecheck": "turbo run typecheck",
+    "test": "turbo run test"
+  },
+  "devDependencies": {
+    "turbo": "^2.5.0",
+    "typescript": "~6.0.3"
+  },
+  "packageManager": "npm@12.1.0",
+  "engines": {
+    "node": ">=22"
+  }
+}

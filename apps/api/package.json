@@ -1,0 +1,25 @@
+{
+  "name": "@trackr/api",
+  "version": "0.1.0",
+  "private": true,
+  "description": "TRACKR backend: OAuth with external trackers and server-side two-way sync.",
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "start": "tsx src/index.ts",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@hono/node-server": "^2.1.5",
+    "@trackr/core": "*",
+    "hono": "^4.13.13"
+  },
+  "devDependencies": {
+    "@trackr/config": "*",
+    "@types/node": "^26.6.5",
+    "tsx": "^4.23.15",
+    "typescript": "~6.0.3",
+    "vitest": "^3.2.0"
+  }
+}
