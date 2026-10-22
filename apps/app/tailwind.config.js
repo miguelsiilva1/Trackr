@@ -4,6 +4,8 @@ const token = name => `rgb(var(--${name}) / <alpha-value>)`;
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   content: ['./src/**/*.{js,jsx,ts,tsx}'],
+  // Theme comes from CSS variables, not dark: variants. 'media' crashes NativeWind's web dev runtime.
+  darkMode: 'class',
   presets: [require('nativewind/preset')],
   theme: {
     extend: {
