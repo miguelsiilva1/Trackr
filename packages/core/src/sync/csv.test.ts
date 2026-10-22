@@ -28,7 +28,7 @@ describe('importCsvFiles', () => {
     expect(added).toBe(1);
     expect(updated).toBe(1);
     expect(items.find(i => i.title === 'Aftersun')).toMatchObject({ myStatus: 'backlog', type: 'movie' });
-    expect(items.find(i => i.title === 'Oppenheimer')).toMatchObject({ myStatus: 'completed', myRating: 4, updatedAt: 42 });
+    expect(items.find(i => i.title === 'Oppenheimer')).toMatchObject({ myStatus: 'completed', myRating: 3.5, updatedAt: 42 });
   });
 
   it('never downgrades a completed title from a watchlist file', () => {

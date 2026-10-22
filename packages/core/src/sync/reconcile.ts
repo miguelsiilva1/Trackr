@@ -1,5 +1,5 @@
 import type { ProviderId, TrackrItem } from '../domain/types';
-import { MEDIA_META, libKey, normalize } from '../domain/media';
+import { MEDIA_META, libKey, normalize, toHalfStar } from '../domain/media';
 import type { Connection, ProviderDef, RemoteEntry, SyncReport } from './types';
 
 export const fromRemote = (r: RemoteEntry, p: ProviderId, at: number): TrackrItem => ({
@@ -11,7 +11,7 @@ export const fromRemote = (r: RemoteEntry, p: ProviderId, at: number): TrackrIte
   coverUrl: '',
   genres: [],
   rating: 0,
-  myRating: r.rating ? Math.round(r.rating) : undefined,
+  myRating: r.rating ? toHalfStar(r.rating) : undefined,
   myStatus: r.status,
   metaDuration: '—',
   platforms: [],
@@ -46,7 +46,7 @@ export function reconcile(local: TrackrItem[], remote: RemoteEntry[], p: Provide
     }
     const l = items[idx];
     const lt = l.updatedAt ?? 0;
-    const differs = l.myStatus !== r.status || (l.myRating ?? 0) !== Math.round(r.rating ?? 0);
+    const differs = l.myStatus !== r.status || (l.myRating ?? 0) !== (r.rating ? toHalfStar(r.rating) : 0);
     if (!differs) continue;
 
     let winner: 'local' | 'remote';
@@ -59,7 +59,7 @@ export function reconcile(local: TrackrItem[], remote: RemoteEntry[], p: Provide
 
     if (winner === 'remote' && canPull) {
       items[idx] = {
-        ...l, myStatus: r.status, myRating: r.rating ? Math.round(r.rating) : l.myRating, updatedAt: r.updatedAt,
+        ...l, myStatus: r.status, myRating: r.rating ? toHalfStar(r.rating) : l.myRating, updatedAt: r.updatedAt,
         progress: r.status === 'completed' ? l.progressTotal ?? l.progress : l.progress,
       };
       report.updated.push(r.title);

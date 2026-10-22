@@ -36,3 +36,6 @@ export const libKey = (i: { type: MediaType; title: string }) => `${i.type}:${no
 /** Where the user can start consuming an item ("Steam", "Netflix", …). */
 export const startWhere = (i: TrackrItem) =>
   i.type === 'game' ? (i.platforms.includes('PC') ? 'Steam' : i.platforms[0] ?? '—') : i.platforms[0] ?? 'streaming';
+
+/** Ratings go in half-star steps, 0.5 to 5. */
+export const toHalfStar = (n: number) => Math.min(5, Math.max(0.5, Math.round(n * 2) / 2));

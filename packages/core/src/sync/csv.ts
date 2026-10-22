@@ -1,5 +1,5 @@
 import type { MediaStatus, MediaType, TrackrItem } from '../domain/types';
-import { MEDIA_STATUSES, MEDIA_TYPES, libKey } from '../domain/media';
+import { MEDIA_STATUSES, MEDIA_TYPES, libKey, toHalfStar } from '../domain/media';
 import { fromRemote } from './reconcile';
 import type { ProviderDef } from './types';
 
@@ -53,7 +53,7 @@ export function importCsvFiles(files: { name: string; text: string }[], items: T
         : fname.includes('watchlist') ? 'backlog'
         : p.csv === 'letterboxd' ? 'completed' : 'backlog';
       const rawRating = parseFloat(row.Rating ?? row.rating ?? '');
-      const rating = Number.isFinite(rawRating) && rawRating > 0 ? Math.max(1, Math.round(rawRating)) : undefined;
+      const rating = Number.isFinite(rawRating) && rawRating > 0 ? toHalfStar(rawRating) : undefined;
       const year = row.Year ?? row.year ?? '';
       const idx = next.findIndex(i => libKey(i) === libKey({ type, title }) && (!year || !i.year || String(i.year) === year));
       if (idx >= 0) {

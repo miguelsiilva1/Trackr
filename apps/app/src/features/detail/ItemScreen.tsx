@@ -185,6 +185,7 @@ export function ItemScreen({ id }: { id: string }) {
             <View className={`flex-row items-center gap-3 ${wide ? 'pl-4 border-l border-line' : 'px-1'}`}>
               <Kicker>{t('my_rating')}</Kicker>
               <StarRating value={item.myRating} onChange={v => update({ myRating: v || undefined })} size={24} />
+              <Txt className={`w-9 text-lg font-bold ${item.myRating ? 'text-fg' : 'text-subtle'}`}>{item.myRating ? item.myRating.toFixed(1) : '–'}</Txt>
             </View>
           </View>
 
