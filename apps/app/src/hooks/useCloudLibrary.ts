@@ -47,6 +47,8 @@ export function useCloudLibrary() {
         if (useAccount.getState().profile?.id !== userId) return;
         const next = useTrackr.getState().items;
         const { upserts, deletes } = diffLibraries(synced, next);
+        // An empty library deleting several titles at once is a reset, not user edits: never mirror it.
+        if (!next.length && deletes.length > 1) return;
         try {
           await upsertCloudItems(userId, upserts);
           await deleteCloudItems(userId, deletes);

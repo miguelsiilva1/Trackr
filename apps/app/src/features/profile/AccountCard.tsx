@@ -4,6 +4,7 @@ import { AlertCircle, Cloud, CloudOff, LogOut } from 'lucide-react-native';
 import { errMsg, type StrKey } from '@trackr/core';
 import { useApp } from '@/providers/AppProviders';
 import { useAccount } from '@/store/useAccount';
+import { useTrackr } from '@/store/useTrackr';
 import { Sheet } from '@/components/Sheet';
 import { Button, ButtonText, Card } from '@/components/Controls';
 import { Kicker, Txt } from '@/components/Txt';
@@ -109,7 +110,7 @@ export function AccountCard() {
       {status === 'signed_in' && profile && (
         <View className="flex-row items-center gap-2">
           <Txt className="flex-1 text-sm">{t('acc_as', { u: profile.username })}</Txt>
-          <Button variant="secondary" onPress={() => void signOut()} className="h-9 px-3">
+          <Button variant="secondary" onPress={() => signOut().catch(e => useTrackr.getState().notify('acc_cloud_err', { e: errMsg(e) }))} className="h-9 px-3">
             <LogOut size={14} color={colors.fg} />
             <ButtonText variant="secondary">{t('acc_signout')}</ButtonText>
           </Button>

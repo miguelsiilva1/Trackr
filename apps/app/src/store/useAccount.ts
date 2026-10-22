@@ -28,8 +28,13 @@ export const useAccount = create<AccountState>()(set => {
   };
 
   // Fires once with the stored session, then on every sign-in/out. Supabase calls must not run inside the callback itself.
-  supabase?.auth.onAuthStateChange((_event, session) => {
-    setTimeout(() => void load(session), 0);
+  supabase?.auth.onAuthStateChange((event, session) => {
+    setTimeout(() => {
+      // Clear only once the session is really gone and the profile is null, so the cloud hook has stopped.
+      void load(session).then(() => {
+        if (event === 'SIGNED_OUT') useTrackr.setState({ items: [], libraryOwner: null });
+      });
+    }, 0);
   });
 
   return {
@@ -50,9 +55,9 @@ export const useAccount = create<AccountState>()(set => {
     },
 
     signOut: async () => {
-      await supabase!.auth.signOut();
-      // The library lives in the account now; leave nothing behind for the next person on this device.
-      useTrackr.setState({ items: [], libraryOwner: null });
+      // On success the SIGNED_OUT event clears the device library: it lives in the account now.
+      const { error } = await supabase!.auth.signOut();
+      if (error) throw error;
     },
   };
 });
