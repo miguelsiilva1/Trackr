@@ -74,7 +74,7 @@ function AuthSheet({ onClose }: { onClose: () => void }) {
           </View>
         )}
         <Button onPress={submit} disabled={!valid || busy} className="h-12">
-          {busy && <ActivityIndicator size="small" color={colors.invFg} />}
+          {busy && <ActivityIndicator size="small" color={colors.accentFg} />}
           <ButtonText>{t(signup ? 'acc_signup' : 'acc_signin')}</ButtonText>
         </Button>
         <Pressable onPress={() => { setMode(signup ? 'signin' : 'signup'); setMessage(null); }} className="self-center">

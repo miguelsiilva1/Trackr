@@ -48,7 +48,7 @@ export function ProviderCard({ p, onConnect, onExport }: { p: ProviderDef; onCon
           </Button>
         ) : (
           <Button onPress={onConnect} className="h-9 px-3">
-            <Link2 size={14} color={colors.invFg} />
+            <Link2 size={14} color={colors.accentFg} />
             <ButtonText>{t('connect')}</ButtonText>
           </Button>
         )}

@@ -14,8 +14,8 @@ function TabButton({ entry, isFocused, ref: _ref, ...props }: TabTriggerSlotProp
   const Icon = entry.icon;
   return (
     <Pressable {...props} className="flex-1 h-16 items-center justify-center gap-1 active:scale-90">
-      <Icon size={22} color={isFocused ? colors.media.game : colors.subtle} />
-      <Txt className={`text-xs font-medium ${isFocused ? 'text-fg' : 'text-subtle'}`}>{t(entry.short)}</Txt>
+      <Icon size={22} color={isFocused ? colors.accent : colors.subtle} />
+      <Txt className={`text-xs font-medium ${isFocused ? 'text-fg' : 'text-subtle'}`}>{t(entry.label)}</Txt>
     </Pressable>
   );
 }
@@ -37,10 +37,10 @@ export function BottomBar({ onAdd }: { onAdd: () => void }) {
           <Pressable
             onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium).catch(() => {}); onAdd(); }}
             accessibilityLabel={t('track_item')}
-            className="w-14 h-14 -mt-7 rounded-2xl bg-inv items-center justify-center active:scale-90"
+            className="w-14 h-14 -mt-7 rounded-2xl bg-accent items-center justify-center active:scale-90"
             style={{ borderWidth: 4, borderColor: colors.bg }}
           >
-            <Plus size={26} strokeWidth={2.5} color={colors.invFg} />
+            <Plus size={26} strokeWidth={2.5} color={colors.accentFg} />
           </Pressable>
         </View>
         {NAV.slice(2).map(tab)}

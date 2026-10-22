@@ -4,11 +4,11 @@ import { useBreakpoint } from '@/hooks/useBreakpoint';
 import { Kicker, Txt } from './Txt';
 
 /** Scrollable page with a centered max width, safe-area aware and clear of the mobile tab bar. */
-export function Screen({ children, scroll = true }: { children: React.ReactNode; scroll?: boolean }) {
+export function Screen({ children, scroll = true, maxWidth = 1280 }: { children: React.ReactNode; scroll?: boolean; maxWidth?: number }) {
   const { wide } = useBreakpoint();
   const insets = useSafeAreaInsets();
   const inner = (
-    <View className={`w-full self-center ${wide ? 'px-8 py-10' : 'px-4 py-5'}`} style={{ maxWidth: 1280, paddingBottom: wide ? 40 : 120 }}>
+    <View className={`w-full self-center ${wide ? 'px-8 py-10' : 'px-4 py-5'}`} style={{ maxWidth, paddingBottom: wide ? 40 : 120 }}>
       {children}
     </View>
   );

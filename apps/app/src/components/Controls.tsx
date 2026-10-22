@@ -39,7 +39,7 @@ export function Segmented<T extends string>({ value, onChange, options }: {
 export function Button({ onPress, children, variant = 'primary', disabled, className = '' }: {
   onPress: () => void; children: React.ReactNode; variant?: 'primary' | 'secondary' | 'accent' | 'ghost'; disabled?: boolean; className?: string;
 }) {
-  const box = variant === 'primary' ? 'bg-inv' : variant === 'accent' ? 'bg-emerald-500' : variant === 'secondary' ? 'bg-surface2' : '';
+  const box = variant === 'primary' ? 'bg-accent' : variant === 'accent' ? 'bg-emerald-500' : variant === 'secondary' ? 'bg-surface2' : '';
   return (
     <Pressable
       onPress={onPress} disabled={disabled}
@@ -52,7 +52,7 @@ export function Button({ onPress, children, variant = 'primary', disabled, class
 
 /** Text styled for use inside <Button>, matching its variant. */
 export function ButtonText({ children, variant = 'primary' }: { children: React.ReactNode; variant?: 'primary' | 'secondary' | 'accent' | 'ghost' }) {
-  const cls = variant === 'primary' ? 'text-inv-fg font-semibold' : variant === 'accent' ? 'text-zinc-950 font-semibold' : variant === 'ghost' ? 'text-subtle' : 'text-fg';
+  const cls = variant === 'primary' ? 'text-accent-fg font-semibold' : variant === 'accent' ? 'text-zinc-950 font-semibold' : variant === 'ghost' ? 'text-subtle' : 'text-fg';
   return <Txt className={`text-sm ${cls}`}>{children}</Txt>;
 }
 

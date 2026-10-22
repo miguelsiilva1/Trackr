@@ -33,7 +33,7 @@ export function ExportSheet({ p, file, onClose }: { p: ProviderDef; file: Export
             <ButtonText variant="secondary">{copied ? t('copied') : t('copy')}</ButtonText>
           </Button>
           <Button onPress={() => saveCsv(file)} className="flex-1">
-            {Platform.OS === 'web' ? <Download size={15} color={colors.invFg} /> : <Share2 size={15} color={colors.invFg} />}
+            {Platform.OS === 'web' ? <Download size={15} color={colors.accentFg} /> : <Share2 size={15} color={colors.accentFg} />}
             <ButtonText>{Platform.OS === 'web' ? t('download') : t('share')}</ButtonText>
           </Button>
         </View>

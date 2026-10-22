@@ -27,6 +27,30 @@ export const seedFeed = (now = Date.now()): FeedEntry[] => [
   { id: 'f6', who: 'Diogo', verb: 'rated', item: byTitle('Dune: Part Two'), rating: 5, ts: now - 2.4 * DAY, reactions: { '🔥': 15, '👏': 4, '🤯': 3 }, mine: [] },
 ];
 
+const AVATAR_GRADIENTS: [string, string][] = [
+  ['#a78bfa', '#6d28d9'], ['#fda4af', '#be123c'], ['#fcd34d', '#b45309'], ['#67e8f9', '#0e7490'],
+  ['#86efac', '#15803d'], ['#f0abfc', '#a21caf'], ['#93c5fd', '#1d4ed8'],
+];
+
+/** Gradient for any user: tribe members keep theirs, everyone else gets a stable one from their name. */
+export const avatarColors = (name: string): [string, string] => {
+  const friend = FRIENDS.find(f => f.name === name);
+  if (friend) return friend.colors;
+  let h = 0;
+  for (const c of name) h = (h * 31 + c.charCodeAt(0)) >>> 0;
+  return AVATAR_GRADIENTS[h % AVATAR_GRADIENTS.length];
+};
+
+/** Activity from TRACKR users outside the tribe, for the Global feed. */
+export const seedGlobalFeed = (now = Date.now()): FeedEntry[] => [
+  { id: 'g1', who: 'Rita', verb: 'completed', item: byTitle('Shōgun'), rating: 5, ts: now - 0.5 * HOUR, reactions: { '🔥': 41, '👏': 18, '🤯': 7 }, mine: [] },
+  { id: 'g2', who: 'Tiago', verb: 'playing', item: byTitle("Baldur's Gate 3"), ts: now - 1.5 * HOUR, reactions: { '🔥': 22, '👏': 6, '🤯': 3 }, mine: [] },
+  { id: 'g3', who: 'Inês', verb: 'rated', item: byTitle('Your Name.'), rating: 5, ts: now - 3 * HOUR, reactions: { '🔥': 15, '👏': 30, '🤯': 9 }, mine: [] },
+  { id: 'g4', who: 'João', verb: 'added', item: byTitle('The Bear'), ts: now - 5 * HOUR, reactions: { '🔥': 8, '👏': 2, '🤯': 0 }, mine: [] },
+  { id: 'g5', who: 'Beatriz', verb: 'completed', item: byTitle('It Takes Two'), rating: 4, ts: now - 9 * HOUR, reactions: { '🔥': 12, '👏': 14, '🤯': 1 }, mine: [] },
+  { id: 'g6', who: 'Rui', verb: 'super', item: byTitle('Breaking Bad'), ts: now - 20 * HOUR, reactions: { '🔥': 33, '👏': 11, '🤯': 19 }, mine: [] },
+];
+
 /** Simulated libraries living in each external service. */
 export const seedRemote = (now = Date.now()): Record<ProviderId, RemoteEntry[]> => ({
   letterboxd: [

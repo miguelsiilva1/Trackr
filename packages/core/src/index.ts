@@ -12,3 +12,4 @@ export * from './sync/csv';
 export * from './mocks/library';
 export * from './mocks/social';
 export * from './cloud/library';
+export * from './catalog/details';

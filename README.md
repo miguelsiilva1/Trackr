@@ -34,14 +34,25 @@ npm test           # testes do core (sync, CSV) e da API
 | `apps/api` | Backend Hono: OAuth e sync no servidor |
 | `packages/core` | Domínio, i18n PT/EN, adaptadores TMDB/RAWG, motor de sync, CSV |
 | `packages/config` | Configuração TypeScript partilhada |
-| `docs/` | Arquitetura e protótipo original |
+| `supabase/migrations` | Esquema Postgres com RLS: perfis, amizades, biblioteca, feed, reações, votos |
 
-Detalhes em [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
+Regras: `apps/app` e `apps/api` dependem de `packages/core` e nunca um do outro. `packages/core` não importa React, Expo nem Node. Rotas em `apps/app/src/app` só montam um ecrã de `features/`.
+
+## Backend (Supabase)
+
+Sem configuração a app corre só no dispositivo. Para contas e biblioteca na cloud:
+
+1. Criar um projeto em supabase.com.
+2. Correr `supabase/migrations/*.sql` no SQL Editor (ou `supabase db push`).
+3. Copiar `apps/app/.env.example` para `apps/app/.env` com o Project URL e a publishable key.
+
+Ao entrar, a biblioteca do dispositivo junta-se à da cloud (ganha a versão mais recente de cada título) e cada alteração é enviada a seguir.
 
 ## Funcionalidades
 
-- **O Meu Trackr** — biblioteca com filtros, pesquisa (mock ou TMDB/RAWG live), notas, progresso e classificação.
-- **TrackrMatch** — deck com swipe; dá match quando a tribo presente já aprovou o título.
-- **Feed da Tribo** — atividade dos amigos com reações.
-- **Perfil & Sync** — ligação a Letterboxd/Serializd/Logg com sync bidirecional, política de conflitos, sync automático e import/export CSV.
+- **Início** — biblioteca em filas (Continuar, Para começar, Completados) por tipo, e pesquisa (mock ou TMDB/RAWG live).
+- **Página do título** — banner, sinopse, estado, nota, notas pessoais; temporadas com episódios e ratings nas séries, conquistas nos jogos; capa e banner personalizáveis.
+- **Match** — deck com swipe; dá match quando a tribo presente já aprovou o título.
+- **Social** — feed da Tribo e Global, com reações.
+- **Perfil** — nome, bio e foto; conta TRACKR; sync com Letterboxd/Serializd/Logg e import/export CSV.
 - **PT/EN** e **tema escuro/claro**, por defeito iguais aos do sistema.

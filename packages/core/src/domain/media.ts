@@ -6,7 +6,7 @@ export const MEDIA_STATUSES: MediaStatus[] = ['backlog', 'in_progress', 'complet
 
 export const MEDIA_META: Record<MediaType, { hex: string; progressUnit: string; defaultTotal: number }> = {
   movie: { hex: '#f59e0b', progressUnit: 'min', defaultTotal: 120 },
-  series: { hex: '#8b5cf6', progressUnit: 'ep', defaultTotal: 10 },
+  series: { hex: '#06b6d4', progressUnit: 'ep', defaultTotal: 10 },
   game: { hex: '#10b981', progressUnit: 'h', defaultTotal: 50 },
 };
 
@@ -25,6 +25,10 @@ export const statusLabel = (s: MediaStatus, type: MediaType | 'all', t: TFn): st
 
 export const normalize = (s: string) =>
   s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').trim();
+
+export const coverOf = (i: Pick<TrackrItem, 'coverUrl' | 'customCover'>) => i.customCover || i.coverUrl;
+export const backdropOf = (i: Pick<TrackrItem, 'coverUrl' | 'backdropUrl' | 'customCover' | 'customBackdrop'>) =>
+  i.customBackdrop || i.backdropUrl;
 
 /** Identity used to match the same title across Trackr and external services. */
 export const libKey = (i: { type: MediaType; title: string }) => `${i.type}:${normalize(i.title)}`;

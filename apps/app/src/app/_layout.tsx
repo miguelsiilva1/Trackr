@@ -18,7 +18,7 @@ function RootStack() {
       <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: 'transparent' } }}>
         <Stack.Screen name="(tabs)" />
         <Stack.Screen name="add" options={{ presentation: 'transparentModal', animation: 'none' }} />
-        <Stack.Screen name="item/[id]" options={{ presentation: 'transparentModal', animation: 'none' }} />
+        <Stack.Screen name="item/[id]" />
       </Stack>
       <MatchCelebration />
       <Toast />

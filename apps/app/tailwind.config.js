@@ -21,6 +21,8 @@ module.exports = {
         subtle: token('subtle'),
         inv: token('inv-bg'),
         'inv-fg': token('inv-fg'),
+        accent: token('accent'),
+        'accent-fg': token('accent-fg'),
         movie: token('movie'),
         series: token('series'),
         game: token('game'),

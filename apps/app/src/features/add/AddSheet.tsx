@@ -65,10 +65,10 @@ export function AddSheet() {
               </View>
               <Pressable
                 disabled={has} onPress={() => addItem(i)}
-                className={`h-9 px-3 rounded-lg flex-row items-center gap-1 active:scale-95 ${has ? 'bg-surface2' : 'bg-inv'}`}
+                className={`h-9 px-3 rounded-lg flex-row items-center gap-1 active:scale-95 ${has ? 'bg-surface2' : 'bg-accent'}`}
               >
-                {has ? <Check size={14} color={colors.media.game} /> : <Plus size={14} color={colors.invFg} />}
-                <Txt className={`text-xs font-semibold ${has ? 'text-game' : 'text-inv-fg'}`}>{has ? t('in_trackr') : t('add_short')}</Txt>
+                {has ? <Check size={14} color={colors.media.game} /> : <Plus size={14} color={colors.accentFg} />}
+                <Txt className={`text-xs font-semibold ${has ? 'text-game' : 'text-accent-fg'}`}>{has ? t('in_trackr') : t('add_short')}</Txt>
               </Pressable>
             </View>
           );

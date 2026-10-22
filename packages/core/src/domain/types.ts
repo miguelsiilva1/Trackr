@@ -25,6 +25,13 @@ export interface TrackrItem {
   notes?: string;
   updatedAt?: number;
   links?: Partial<Record<ProviderId, number>>;
+  /** User-chosen artwork (URL or data URI) shown instead of coverUrl / backdropUrl. */
+  customCover?: string;
+  customBackdrop?: string;
+  /** Series: watched episodes as `season:episode` ("1:3"). */
+  watched?: string[];
+  /** Games: ids of unlocked achievements. */
+  unlocked?: string[];
 }
 
 export interface ApiKeys {

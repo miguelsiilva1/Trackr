@@ -46,7 +46,7 @@ export function LoginSheet({ p, onClose }: { p: ProviderDef; onClose: () => void
           <Txt className="flex-1 text-xs text-muted leading-relaxed">{official ? t('login_note_oauth') : t('login_note_none', { p: p.name })}</Txt>
         </View>
         <Button onPress={submit} disabled={!user.trim() || busy} className="h-12">
-          {busy ? <ActivityIndicator size="small" color={colors.invFg} /> : <Link2 size={18} color={colors.invFg} />}
+          {busy ? <ActivityIndicator size="small" color={colors.accentFg} /> : <Link2 size={18} color={colors.accentFg} />}
           <ButtonText>{official ? t('login_cta', { p: p.name }) : t('login_sim_cta')}</ButtonText>
         </Button>
       </View>

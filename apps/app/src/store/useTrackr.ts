@@ -2,10 +2,17 @@ import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
-  MOCK_LIBRARY, REMOTE_EXTRAS, importCsvFiles, libKey, providerById, reconcile, seedFeed, seedRemote, zeroReactions,
+  MOCK_LIBRARY, REMOTE_EXTRAS, importCsvFiles, libKey, providerById, reconcile, seedFeed, seedGlobalFeed, seedRemote, zeroReactions,
   type ApiKeys, type Connection, type FeedEntry, type FeedVerb, type LangPref, type MediaType, type ProviderId,
   type Reaction, type RemoteEntry, type StrKey, type SyncReport, type ThemePref, type TrackrItem, type Vote,
 } from '@trackr/core';
+
+export interface Me {
+  name: string;
+  bio: string;
+  /** Profile photo as a data URI, so it survives restarts on every platform. */
+  photo?: string;
+}
 
 export interface Toast {
   id: number;
@@ -15,11 +22,15 @@ export interface Toast {
 
 interface TrackrState {
   prefs: { lang: LangPref; theme: ThemePref };
+  me: Me;
   keys: ApiKeys;
   items: TrackrItem[];
   /** Account the device library belongs to; null while it was never linked to one. */
   libraryOwner: string | null;
+  /** Tribe feed (you + friends). */
   feed: FeedEntry[];
+  /** Everyone on TRACKR. */
+  globalFeed: FeedEntry[];
   // Match session (not persisted)
   friends: string[];
   plan: MediaType;
@@ -34,6 +45,7 @@ interface TrackrState {
   toast: Toast | null;
 
   setPrefs: (patch: Partial<TrackrState['prefs']>) => void;
+  setMe: (patch: Partial<Me>) => void;
   saveKeys: (k: ApiKeys) => void;
   updateItem: (id: TrackrItem['id'], patch: Partial<TrackrItem>) => void;
   addItem: (i: TrackrItem) => void;
@@ -66,10 +78,12 @@ export const useTrackr = create<TrackrState>()(
 
       return {
         prefs: { lang: 'system', theme: 'system' },
+        me: { name: '', bio: '' },
         keys: { tmdb: '', rawg: '' },
         items: MOCK_LIBRARY,
         libraryOwner: null,
         feed: seedFeed(),
+        globalFeed: seedGlobalFeed(),
         friends: ['Diogo', 'Sara'],
         plan: 'movie',
         votes: {},
@@ -84,6 +98,7 @@ export const useTrackr = create<TrackrState>()(
         notify: (key, vars) => set({ toast: { id: Date.now(), key, vars } }),
 
         setPrefs: patch => set(s => ({ prefs: { ...s.prefs, ...patch } })),
+        setMe: patch => set(s => ({ me: { ...s.me, ...patch } })),
 
         saveKeys: k => {
           set({ keys: k });
@@ -115,13 +130,14 @@ export const useTrackr = create<TrackrState>()(
           if (it) get().notify('toast_removed', { t: it.title });
         },
 
-        react: (feedId, r) => set(s => ({
-          feed: s.feed.map(f => {
+        react: (feedId, r) => {
+          const toggle = (f: FeedEntry) => {
             if (f.id !== feedId) return f;
             const mine = f.mine.includes(r);
             return { ...f, mine: mine ? f.mine.filter(x => x !== r) : [...f.mine, r], reactions: { ...f.reactions, [r]: f.reactions[r] + (mine ? -1 : 1) } };
-          }),
-        })),
+          };
+          set(s => ({ feed: s.feed.map(toggle), globalFeed: s.globalFeed.map(toggle) }));
+        },
 
         setFriends: friends => set({ friends }),
         setPlan: plan => set({ plan }),
@@ -221,7 +237,7 @@ export const useTrackr = create<TrackrState>()(
       name: 'trackr.store.v1',
       storage: createJSONStorage(() => AsyncStorage),
       partialize: s => ({
-        prefs: s.prefs, keys: s.keys, items: s.items, libraryOwner: s.libraryOwner, feed: s.feed, conns: s.conns, remote: s.remote, syncLog: s.syncLog,
+        prefs: s.prefs, me: s.me, keys: s.keys, items: s.items, libraryOwner: s.libraryOwner, feed: s.feed, globalFeed: s.globalFeed, conns: s.conns, remote: s.remote, syncLog: s.syncLog,
       }),
     },
   ),

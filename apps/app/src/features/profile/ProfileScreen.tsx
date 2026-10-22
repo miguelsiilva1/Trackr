@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react';
 import { Pressable, TextInput, View } from 'react-native';
-import { Activity, Eye, EyeOff, Key, Languages, Monitor, Moon, Plus, RefreshCw, Settings, Sun } from 'lucide-react-native';
+import { Activity, Eye, EyeOff, Key, Languages, Monitor, Moon, Pencil, Plus, RefreshCw, Settings, Sun } from 'lucide-react-native';
 import {
   PROVIDERS, formatAgo, providerById, type ApiKeys, type ExportFile, type LangPref, type ProviderDef, type ThemePref,
 } from '@trackr/core';
 import { useApp } from '@/providers/AppProviders';
 import { useTrackr } from '@/store/useTrackr';
+import { useAccount } from '@/store/useAccount';
 import { useBreakpoint } from '@/hooks/useBreakpoint';
 import { Screen } from '@/components/Screen';
 import { Button, ButtonText, Card, Segmented } from '@/components/Controls';
@@ -15,6 +16,7 @@ import { ProviderCard } from './ProviderCard';
 import { LoginSheet } from './LoginSheet';
 import { ExportSheet } from './ExportSheet';
 import { AccountCard } from './AccountCard';
+import { EditProfileSheet } from './EditProfileSheet';
 
 function PreferencesCard() {
   const { t, colors } = useApp();
@@ -107,16 +109,23 @@ export function ProfileScreen() {
   const { wide } = useBreakpoint();
   const [loginFor, setLoginFor] = useState<ProviderDef | null>(null);
   const [exporting, setExporting] = useState<{ p: ProviderDef; file: ExportFile } | null>(null);
+  const [editing, setEditing] = useState(false);
+  const me = useTrackr(s => s.me);
+  const username = useAccount(s => s.profile?.username);
 
   return (
     <Screen>
       <Card className="mb-6 flex-row items-center gap-4 rounded-3xl p-5">
-        <Avatar who="me" size={64} ring />
+        <Pressable onPress={() => setEditing(true)}><Avatar who="me" size={wide ? 80 : 64} ring /></Pressable>
         <View className="flex-1">
-          <Kicker>{t('profile_kicker')}</Kicker>
-          <Txt className={`${wide ? 'text-3xl' : 'text-2xl'} font-black tracking-tight`}>{t('nav_profile')}</Txt>
-          <Txt className="text-sm text-muted">{t('profile_tagline')}</Txt>
+          <Kicker>{username ? `@${username}` : t('profile_kicker')}</Kicker>
+          <Txt className={`${wide ? 'text-3xl' : 'text-2xl'} font-black tracking-tight`} numberOfLines={1}>{me.name || t('you')}</Txt>
+          <Txt className="text-sm text-muted" numberOfLines={2}>{me.bio || t('profile_tagline')}</Txt>
         </View>
+        <Button variant="secondary" onPress={() => setEditing(true)} className="h-9 px-3">
+          <Pencil size={14} color={colors.fg} />
+          {wide && <ButtonText variant="secondary">{t('edit_profile')}</ButtonText>}
+        </Button>
       </Card>
 
       <View className={`gap-6 ${wide ? 'flex-row items-start' : ''}`}>
@@ -146,6 +155,7 @@ export function ProfileScreen() {
       </View>
 
       {loginFor && <LoginSheet p={loginFor} onClose={() => setLoginFor(null)} />}
+      {editing && <EditProfileSheet onClose={() => setEditing(false)} />}
       {exporting && <ExportSheet p={exporting.p} file={exporting.file} onClose={() => setExporting(null)} />}
     </Screen>
   );

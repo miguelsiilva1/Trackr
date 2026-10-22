@@ -1,7 +1,7 @@
 import { useLocalSearchParams } from 'expo-router';
-import { DetailSheet } from '@/features/detail/DetailSheet';
+import { ItemScreen } from '@/features/detail/ItemScreen';
 
 export default function ItemRoute() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  return <DetailSheet id={id} />;
+  return <ItemScreen id={id} />;
 }

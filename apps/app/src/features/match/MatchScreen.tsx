@@ -15,7 +15,7 @@ import { SwipeDeck, type SwipeDeckHandle } from './SwipeDeck';
 
 const PLANS: { id: MediaType; key: StrKey; box: string; text: string }[] = [
   { id: 'movie', key: 'plan_movie', box: 'bg-amber-500', text: 'text-zinc-950' },
-  { id: 'series', key: 'plan_series', box: 'bg-violet-500', text: 'text-white' },
+  { id: 'series', key: 'plan_series', box: 'bg-cyan-500', text: 'text-zinc-950' },
   { id: 'game', key: 'plan_game', box: 'bg-emerald-500', text: 'text-zinc-950' },
 ];
 
@@ -118,7 +118,7 @@ export function MatchScreen() {
                   const on = plan === p.id;
                   return (
                     <Pill key={p.id} active={on} onPress={() => setPlan(p.id)} activeClass={p.box}>
-                      <MediaIcon type={p.id} size={15} color={on ? (p.id === 'series' ? '#fff' : '#09090b') : colors.muted} />
+                      <MediaIcon type={p.id} size={15} color={on ? '#09090b' : colors.muted} />
                       <Txt className={`text-sm font-medium ${on ? p.text : 'text-muted'}`}>{t(p.key)}</Txt>
                     </Pill>
                   );

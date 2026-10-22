@@ -17,9 +17,11 @@ interface AccountState {
   /** Resolves `confirm_email` when the project requires email confirmation before the first sign-in. */
   signUp: (email: string, password: string, username: string) => Promise<'signed_in' | 'confirm_email'>;
   signOut: () => Promise<void>;
+  /** No-op when signed out: the name then only lives on this device. */
+  updateDisplayName: (name: string) => Promise<void>;
 }
 
-export const useAccount = create<AccountState>()(set => {
+export const useAccount = create<AccountState>()((set, get) => {
   const load = async (session: Session | null) => {
     if (!supabase || !session) return set({ status: 'signed_out', profile: null });
     const { data, error } = await supabase.from('profiles').select('id, username, display_name').eq('id', session.user.id).single();
@@ -58,6 +60,14 @@ export const useAccount = create<AccountState>()(set => {
       // On success the SIGNED_OUT event clears the device library: it lives in the account now.
       const { error } = await supabase!.auth.signOut();
       if (error) throw error;
+    },
+
+    updateDisplayName: async name => {
+      const profile = get().profile;
+      if (!supabase || !profile) return;
+      const { error } = await supabase.from('profiles').update({ display_name: name }).eq('id', profile.id);
+      if (error) throw error;
+      set({ profile: { ...profile, displayName: name } });
     },
   };
 });
