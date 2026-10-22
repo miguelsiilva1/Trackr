@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import type { Session } from '@supabase/supabase-js';
 import { supabase } from '@/lib/supabase';
+import { useTrackr } from './useTrackr';
 
 export interface Profile {
   id: string;
@@ -50,6 +51,8 @@ export const useAccount = create<AccountState>()(set => {
 
     signOut: async () => {
       await supabase!.auth.signOut();
+      // The library lives in the account now; leave nothing behind for the next person on this device.
+      useTrackr.setState({ items: [], libraryOwner: null });
     },
   };
 });

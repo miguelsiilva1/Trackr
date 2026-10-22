@@ -17,6 +17,8 @@ interface TrackrState {
   prefs: { lang: LangPref; theme: ThemePref };
   keys: ApiKeys;
   items: TrackrItem[];
+  /** Account the device library belongs to; null while it was never linked to one. */
+  libraryOwner: string | null;
   feed: FeedEntry[];
   // Match session (not persisted)
   friends: string[];
@@ -66,6 +68,7 @@ export const useTrackr = create<TrackrState>()(
         prefs: { lang: 'system', theme: 'system' },
         keys: { tmdb: '', rawg: '' },
         items: MOCK_LIBRARY,
+        libraryOwner: null,
         feed: seedFeed(),
         friends: ['Diogo', 'Sara'],
         plan: 'movie',
@@ -218,7 +221,7 @@ export const useTrackr = create<TrackrState>()(
       name: 'trackr.store.v1',
       storage: createJSONStorage(() => AsyncStorage),
       partialize: s => ({
-        prefs: s.prefs, keys: s.keys, items: s.items, feed: s.feed, conns: s.conns, remote: s.remote, syncLog: s.syncLog,
+        prefs: s.prefs, keys: s.keys, items: s.items, libraryOwner: s.libraryOwner, feed: s.feed, conns: s.conns, remote: s.remote, syncLog: s.syncLog,
       }),
     },
   ),

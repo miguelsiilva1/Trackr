@@ -162,5 +162,6 @@ create policy "owner changes vote" on public.match_votes
 create policy "owner removes vote" on public.match_votes
   for delete to authenticated using (user_id = (select auth.uid()));
 
--- Live updates for the feed and the match deck.
-alter publication supabase_realtime add table public.feed_events, public.reactions, public.match_votes;
+-- Live feed updates. Realtime DELETE events skip RLS and carry the primary key, so only tables
+-- with an opaque key are published; reactions and votes need private Broadcast channels instead.
+alter publication supabase_realtime add table public.feed_events;

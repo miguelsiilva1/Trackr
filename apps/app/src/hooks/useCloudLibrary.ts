@@ -31,8 +31,10 @@ export function useCloudLibrary() {
       try {
         const cloud = await fetchCloudLibrary(userId);
         if (cancelled) return;
-        synced = mergeLibraries(useTrackr.getState().items, cloud);
-        useTrackr.setState({ items: synced });
+        // Only merge device data that is anonymous or already this account's; never upload another account's library.
+        const { items, libraryOwner } = useTrackr.getState();
+        synced = mergeLibraries(!libraryOwner || libraryOwner === userId ? items : [], cloud);
+        useTrackr.setState({ items: synced, libraryOwner: userId });
         await upsertCloudItems(userId, diffLibraries(cloud, synced).upserts);
         useTrackr.getState().notify('acc_synced');
       } catch (e) {
