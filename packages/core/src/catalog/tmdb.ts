@@ -1,6 +1,6 @@
-import type { Lang, TrackrItem } from '../domain/types';
+import type { CatalogAccess, Lang, TrackrItem } from '../domain/types';
 import { MEDIA_META } from '../domain/media';
-import { fetchJson } from './http';
+import { catalogGet } from './http';
 
 export const TMDB_IMG = 'https://image.tmdb.org/t/p';
 
@@ -38,9 +38,8 @@ export const tmdbAdapter = {
     };
   },
 
-  async search(query: string, key: string, lang: Lang): Promise<TrackrItem[]> {
-    const url = `https://api.themoviedb.org/3/search/multi?query=${encodeURIComponent(query)}&api_key=${encodeURIComponent(key)}&language=${lang === 'pt' ? 'pt-PT' : 'en-US'}`;
-    const data = await fetchJson(url);
+  async search(query: string, access: CatalogAccess, lang: Lang): Promise<TrackrItem[]> {
+    const data = await catalogGet('tmdb', '/search/multi', { query, language: lang === 'pt' ? 'pt-PT' : 'en-US' }, access);
     return (data.results ?? [])
       .filter((r: any) => r.media_type === 'movie' || r.media_type === 'tv')
       .slice(0, 12)

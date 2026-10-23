@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { fetchItemDetails, libKey, type ItemDetails, type TrackrItem } from '@trackr/core';
 import { useApp } from '@/providers/AppProviders';
-import { useTrackr } from '@/store/useTrackr';
+import { useCatalogAccess } from './useCatalogAccess';
 
 // Session cache: reopening a title doesn't refetch seasons, achievements or artwork.
 const cache = new Map<string, ItemDetails>();
@@ -9,8 +9,8 @@ const cache = new Map<string, ItemDetails>();
 /** Seasons / achievements / artwork for a title; undefined while loading. */
 export function useItemDetails(item: TrackrItem | undefined) {
   const { lang } = useApp();
-  const keys = useTrackr(s => s.keys);
-  const cacheKey = item ? `${libKey(item)}|${lang}|${keys.tmdb}|${keys.rawg}` : '';
+  const access = useCatalogAccess();
+  const cacheKey = item ? `${libKey(item)}|${lang}|${access.tmdb}|${access.rawg}|${!!access.proxy}` : '';
   const [details, setDetails] = useState(() => cache.get(cacheKey));
 
   useEffect(() => {
@@ -19,7 +19,7 @@ export function useItemDetails(item: TrackrItem | undefined) {
     if (hit) return setDetails(hit);
     let alive = true;
     setDetails(undefined);
-    void fetchItemDetails(item, keys, lang).then(d => {
+    void fetchItemDetails(item, access, lang).then(d => {
       cache.set(cacheKey, d);
       if (alive) setDetails(d);
     });

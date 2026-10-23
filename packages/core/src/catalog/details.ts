@@ -1,6 +1,6 @@
-import type { ApiKeys, Lang, TrackrItem } from '../domain/types';
+import type { CatalogAccess, Lang, TrackrItem } from '../domain/types';
 import { normalize } from '../domain/media';
-import { errMsg, fetchJson } from './http';
+import { canReach, catalogGet, errMsg, fetchJson } from './http';
 import { TMDB_IMG } from './tmdb';
 import { MOCK_ART, MOCK_STEAM_ACHIEVEMENTS } from '../mocks/artwork';
 
@@ -148,22 +148,20 @@ async function tvmazeDetails(item: TrackrItem): Promise<Pick<ItemDetails, 'seaso
 
 const tmdbLang = (lang: Lang) => (lang === 'pt' ? 'pt-PT' : 'en-US');
 
-async function tmdbId(item: TrackrItem, key: string): Promise<number | undefined> {
+async function tmdbId(item: TrackrItem, access: CatalogAccess): Promise<number | undefined> {
   if (item.apiSource === 'tmdb' && item.externalId) return Number(item.externalId);
   const kind = item.type === 'series' ? 'tv' : 'movie';
   const yearParam = kind === 'tv' ? 'first_air_date_year' : 'year';
-  const data = await fetchJson(
-    `https://api.themoviedb.org/3/search/${kind}?query=${encodeURIComponent(item.title)}&${yearParam}=${item.year}&api_key=${encodeURIComponent(key)}`,
-  );
+  const data = await catalogGet('tmdb', `/search/${kind}`, { query: item.title, [yearParam]: item.year }, access);
   return data.results?.[0]?.id;
 }
 
-async function tmdbSeasons(id: number, key: string, lang: Lang): Promise<Season[]> {
-  const q = `api_key=${encodeURIComponent(key)}&language=${tmdbLang(lang)}`;
-  const show = await fetchJson(`https://api.themoviedb.org/3/tv/${id}?${q}`);
+async function tmdbSeasons(id: number, access: CatalogAccess, lang: Lang): Promise<Season[]> {
+  const q = { language: tmdbLang(lang) };
+  const show = await catalogGet('tmdb', `/tv/${id}`, q, access);
   const numbers: number[] = (show.seasons ?? []).map((s: any) => s.season_number).filter((n: number) => n > 0);
   return Promise.all(numbers.map(async n => {
-    const s = await fetchJson(`https://api.themoviedb.org/3/tv/${id}/season/${n}?${q}`);
+    const s = await catalogGet('tmdb', `/tv/${id}/season/${n}`, q, access);
     return {
       number: n,
       name: s.name ?? '',
@@ -180,30 +178,28 @@ async function tmdbSeasons(id: number, key: string, lang: Lang): Promise<Season[
   }));
 }
 
-async function tmdbArtwork(item: TrackrItem, id: number, key: string): Promise<Artwork> {
+async function tmdbArtwork(item: TrackrItem, id: number, access: CatalogAccess): Promise<Artwork> {
   const kind = item.type === 'series' ? 'tv' : 'movie';
-  const data = await fetchJson(`https://api.themoviedb.org/3/${kind}/${id}/images?api_key=${encodeURIComponent(key)}`);
+  const data = await catalogGet('tmdb', `/${kind}/${id}/images`, {}, access);
   return {
     posters: (data.posters ?? []).slice(0, 30).map((p: any) => `${TMDB_IMG}/w500${p.file_path}`),
     backdrops: (data.backdrops ?? []).slice(0, 30).map((p: any) => `${TMDB_IMG}/w1280${p.file_path}`),
   };
 }
 
-async function rawgId(item: TrackrItem, key: string): Promise<number | undefined> {
+async function rawgId(item: TrackrItem, access: CatalogAccess): Promise<number | undefined> {
   if (item.apiSource === 'rawg' && item.externalId) return Number(item.externalId);
-  const data = await fetchJson(
-    `https://api.rawg.io/api/games?search=${encodeURIComponent(item.title)}&search_precise=true&page_size=5&key=${encodeURIComponent(key)}`,
-  );
+  const data = await catalogGet('rawg', '/games', { search: item.title, search_precise: 'true', page_size: 5 }, access);
   const results: any[] = data.results ?? [];
   return (results.find(g => normalize(g.name) === normalize(item.title)) ?? results[0])?.id;
 }
 
 const RAWG_ACHIEVEMENT_PAGES = 3;
 
-async function rawgAchievements(id: number, key: string): Promise<Achievement[]> {
+async function rawgAchievements(id: number, access: CatalogAccess): Promise<Achievement[]> {
   const out: Achievement[] = [];
   for (let page = 1; page <= RAWG_ACHIEVEMENT_PAGES; page++) {
-    const data = await fetchJson(`https://api.rawg.io/api/games/${id}/achievements?page=${page}&page_size=40&key=${encodeURIComponent(key)}`);
+    const data = await catalogGet('rawg', `/games/${id}/achievements`, { page, page_size: 40 }, access);
     out.push(...(data.results ?? []).map((a: any) => ({
       id: String(a.id), name: a.name ?? '', description: a.description ?? '', percent: Number(a.percent) || 0, image: a.image ?? undefined,
     })));
@@ -212,10 +208,10 @@ async function rawgAchievements(id: number, key: string): Promise<Achievement[]>
   return out.sort((a, b) => b.percent - a.percent);
 }
 
-async function rawgArtwork(id: number, key: string): Promise<Artwork> {
+async function rawgArtwork(id: number, access: CatalogAccess): Promise<Artwork> {
   const [game, shots] = await Promise.all([
-    fetchJson(`https://api.rawg.io/api/games/${id}?key=${encodeURIComponent(key)}`),
-    fetchJson(`https://api.rawg.io/api/games/${id}/screenshots?key=${encodeURIComponent(key)}`),
+    catalogGet('rawg', `/games/${id}`, {}, access),
+    catalogGet('rawg', `/games/${id}/screenshots`, {}, access),
   ]);
   const images = [game.background_image, game.background_image_additional, ...(shots.results ?? []).map((s: any) => s.image)].filter(Boolean);
   return { posters: images, backdrops: images };
@@ -230,28 +226,28 @@ const mockDetails = (item: TrackrItem, lang: Lang, warnings: string[]): ItemDeta
 });
 
 /** Seasons, achievements and alternative artwork for one title. Never rejects: falls back to mock data. */
-export async function fetchItemDetails(item: TrackrItem, keys: ApiKeys, lang: Lang): Promise<ItemDetails> {
+export async function fetchItemDetails(item: TrackrItem, access: CatalogAccess, lang: Lang): Promise<ItemDetails> {
   try {
     if (item.type === 'game') {
-      if (!keys.rawg) return mockDetails(item, lang, []);
-      const id = await rawgId(item, keys.rawg);
+      if (!canReach('rawg', access)) return mockDetails(item, lang, []);
+      const id = await rawgId(item, access);
       if (!id) return mockDetails(item, lang, ['RAWG: not found']);
-      const [achievements, artwork] = await Promise.all([rawgAchievements(id, keys.rawg), rawgArtwork(id, keys.rawg)]);
+      const [achievements, artwork] = await Promise.all([rawgAchievements(id, access), rawgArtwork(id, access)]);
       return { achievements, artwork, source: 'remote', warnings: [] };
     }
-    if (!keys.tmdb) {
+    if (!canReach('tmdb', access)) {
       if (item.type !== 'series') return mockDetails(item, lang, []);
       return { ...(await tvmazeDetails(item)), source: 'remote', warnings: [] };
     }
-    const id = await tmdbId(item, keys.tmdb);
+    const id = await tmdbId(item, access);
     if (!id) return mockDetails(item, lang, ['TMDB: not found']);
     const [seasons, artwork] = await Promise.all([
-      item.type === 'series' ? tmdbSeasons(id, keys.tmdb, lang) : Promise.resolve(undefined),
-      tmdbArtwork(item, id, keys.tmdb),
+      item.type === 'series' ? tmdbSeasons(id, access, lang) : Promise.resolve(undefined),
+      tmdbArtwork(item, id, access),
     ]);
     return { seasons, artwork, source: 'remote', warnings: [] };
   } catch (e) {
-    const src = item.type === 'game' ? 'RAWG' : keys.tmdb ? 'TMDB' : 'TVmaze';
+    const src = item.type === 'game' ? 'RAWG' : canReach('tmdb', access) ? 'TMDB' : 'TVmaze';
     return mockDetails(item, lang, [`${src}: ${errMsg(e)}`]);
   }
 }

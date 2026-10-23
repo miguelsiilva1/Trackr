@@ -1,6 +1,6 @@
-import type { TrackrItem } from '../domain/types';
+import type { CatalogAccess, TrackrItem } from '../domain/types';
 import { MEDIA_META } from '../domain/media';
-import { fetchJson } from './http';
+import { catalogGet } from './http';
 
 const RAWG_PLATFORMS: Record<string, string> = {
   pc: 'PC', playstation: 'PlayStation', xbox: 'Xbox', nintendo: 'Nintendo',
@@ -34,9 +34,8 @@ export const rawgAdapter = {
     };
   },
 
-  async search(query: string, key: string): Promise<TrackrItem[]> {
-    const url = `https://api.rawg.io/api/games?search=${encodeURIComponent(query)}&key=${encodeURIComponent(key)}&page_size=12`;
-    const data = await fetchJson(url);
+  async search(query: string, access: CatalogAccess): Promise<TrackrItem[]> {
+    const data = await catalogGet('rawg', '/games', { search: query, page_size: 12 }, access);
     return (data.results ?? []).map(rawgAdapter.map);
   },
 };

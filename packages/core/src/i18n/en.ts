@@ -11,6 +11,8 @@ export const en: Record<StrKey, string> = {
   discover: 'Discover', src_live: 'TMDB / RAWG (live)', src_local: 'local catalog',
   nothing_new: 'Nothing new for “{q}”. Everything is already in your Trackr.', using_local: 'using local data.',
   empty_title: 'Nothing here.', empty_body: 'Adjust the filters or add something new to Trackr.',
+  welcome_title: 'Start your library', welcome_body: 'Search movies, series and games and track what you finished, what you are on and what is next.',
+  welcome_add: 'Add your first title', welcome_import: 'Import CSV (Letterboxd, Serializd…)',
   add_ph: 'Movie, series or game…', live_search: 'Live search: {s}', mock_hint: 'Mock mode — add keys in Profile for real search',
   suggestions: 'Suggestions', no_results: 'No results for “{q}”.', in_trackr: 'In Trackr', add_to: 'Add to Trackr', add_short: 'Add',
   status: 'Status', my_rating: 'My rating', notes: 'Personal notes', notes_ph_game: 'Build, boss where I stopped, who to play with…',

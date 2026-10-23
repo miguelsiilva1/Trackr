@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { ActivityIndicator, Pressable, TextInput, View } from 'react-native';
 import { router } from 'expo-router';
-import { AlertCircle, LayoutGrid, Plus, Search, X } from 'lucide-react-native';
+import { AlertCircle, LayoutGrid, Plus, Search, Upload, X } from 'lucide-react-native';
 import {
   MEDIA_TYPES, MOCK_CATALOG, libKey, normalize, tGenre, type MediaStatus, type MediaType, type StrKey, type TrackrItem,
 } from '@trackr/core';
@@ -11,6 +11,7 @@ import { useBreakpoint } from '@/hooks/useBreakpoint';
 import { useMediaSearch } from '@/hooks/useMediaSearch';
 import { Screen } from '@/components/Screen';
 import { MediaIcon } from '@/components/MediaIcon';
+import { Button, ButtonText } from '@/components/Controls';
 import { Txt } from '@/components/Txt';
 import { ContinueCard, PosterCard } from './Cards';
 import { Rail } from './Rail';
@@ -152,6 +153,28 @@ export function HubScreen() {
             </Rail>
           );
         })
+      ) : !items.length ? (
+        <View className="py-20 items-center gap-2 self-center" style={{ maxWidth: 420 }}>
+          <View className="flex-row gap-2 mb-2">
+            {MEDIA_TYPES.map(ty => (
+              <View key={ty} className="w-12 h-12 rounded-2xl bg-surface border border-line items-center justify-center">
+                <MediaIcon type={ty} size={22} color={colors.media[ty]} />
+              </View>
+            ))}
+          </View>
+          <Txt className="text-2xl font-black text-center">{t('welcome_title')}</Txt>
+          <Txt className="text-sm text-muted text-center leading-relaxed">{t('welcome_body')}</Txt>
+          <View className="gap-2 mt-4 w-full">
+            <Button onPress={() => router.push('/add')} className="h-12">
+              <Plus size={18} color={colors.accentFg} />
+              <ButtonText>{t('welcome_add')}</ButtonText>
+            </Button>
+            <Button variant="ghost" onPress={() => router.push('/profile')} className="h-11">
+              <Upload size={16} color={colors.muted} />
+              <ButtonText variant="ghost">{t('welcome_import')}</ButtonText>
+            </Button>
+          </View>
+        </View>
       ) : (
         <View className="py-16 items-center gap-1">
           <LayoutGrid size={40} color={colors.subtle} />

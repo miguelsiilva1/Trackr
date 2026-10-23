@@ -1,6 +1,6 @@
-import type { ApiKeys, Lang, TrackrItem } from '../domain/types';
+import type { CatalogAccess, Lang, TrackrItem } from '../domain/types';
 import { normalize } from '../domain/media';
-import { errMsg } from './http';
+import { canReach, errMsg } from './http';
 import { tmdbAdapter } from './tmdb';
 import { rawgAdapter } from './rawg';
 
@@ -17,11 +17,11 @@ export const MediaRepository = {
   },
 
   /** Never rejects: network, CORS or key failures fall back to the local pool. */
-  async search(query: string, keys: ApiKeys, pool: TrackrItem[], lang: Lang): Promise<SearchOutcome> {
+  async search(query: string, access: CatalogAccess, pool: TrackrItem[], lang: Lang): Promise<SearchOutcome> {
     const warnings: string[] = [];
     const tasks: Promise<TrackrItem[]>[] = [];
-    if (keys.tmdb) tasks.push(tmdbAdapter.search(query, keys.tmdb, lang).catch(e => { warnings.push(`TMDB: ${errMsg(e)}`); return []; }));
-    if (keys.rawg) tasks.push(rawgAdapter.search(query, keys.rawg).catch(e => { warnings.push(`RAWG: ${errMsg(e)}`); return []; }));
+    if (canReach('tmdb', access)) tasks.push(tmdbAdapter.search(query, access, lang).catch(e => { warnings.push(`TMDB: ${errMsg(e)}`); return []; }));
+    if (canReach('rawg', access)) tasks.push(rawgAdapter.search(query, access).catch(e => { warnings.push(`RAWG: ${errMsg(e)}`); return []; }));
     const local = MediaRepository.searchLocal(query, pool);
     if (!tasks.length) return { items: local, source: 'mock', warnings };
     const remote = (await Promise.all(tasks)).flat();

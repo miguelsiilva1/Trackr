@@ -39,6 +39,11 @@ export interface ApiKeys {
   rawg: string;
 }
 
+/** How the catalog is reached: the user's own keys win, otherwise the TRACKR proxy (which holds the keys) when signed in. */
+export interface CatalogAccess extends ApiKeys {
+  proxy?: { url: string; token: string };
+}
+
 export type Reaction = '🔥' | '👏' | '🤯';
 export type Vote = 'pass' | 'like' | 'super';
 

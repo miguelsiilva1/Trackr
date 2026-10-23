@@ -10,6 +10,8 @@ export const pt = {
   discover: 'Descobrir', src_live: 'TMDB / RAWG (live)', src_local: 'catálogo local',
   nothing_new: 'Nada novo para “{q}”. Tudo o que existe já está no teu Trackr.', using_local: 'a usar dados locais.',
   empty_title: 'Nada por aqui.', empty_body: 'Ajusta os filtros ou adiciona algo novo ao Trackr.',
+  welcome_title: 'Começa a tua biblioteca', welcome_body: 'Procura filmes, séries e jogos e marca o que viste, o que estás a ver e o que queres ver a seguir.',
+  welcome_add: 'Adicionar primeiro título', welcome_import: 'Importar CSV (Letterboxd, Serializd…)',
   add_ph: 'Filme, série ou jogo…', live_search: 'Pesquisa live: {s}', mock_hint: 'Modo mock — adiciona chaves em Perfil para pesquisa real',
   suggestions: 'Sugestões', no_results: 'Sem resultados para “{q}”.', in_trackr: 'No Trackr', add_to: 'Adicionar ao Trackr', add_short: 'Adicionar',
   status: 'Estado', my_rating: 'A minha nota', notes: 'Notas pessoais', notes_ph_game: 'Build, boss onde parei, com quem jogar…',

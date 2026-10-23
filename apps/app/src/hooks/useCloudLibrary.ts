@@ -32,8 +32,10 @@ export function useCloudLibrary() {
         const cloud = await fetchCloudLibrary(userId);
         if (cancelled) return;
         // Only merge device data that is anonymous or already this account's; never upload another account's library.
+        // Anonymous demo titles stay behind, so a new account starts empty.
         const { items, libraryOwner } = useTrackr.getState();
-        synced = mergeLibraries(!libraryOwner || libraryOwner === userId ? items : [], cloud);
+        const claim = !libraryOwner ? items.filter(i => i.apiSource !== 'local_mock') : libraryOwner === userId ? items : [];
+        synced = mergeLibraries(claim, cloud);
         useTrackr.setState({ items: synced, libraryOwner: userId });
         await upsertCloudItems(userId, diffLibraries(cloud, synced).upserts);
         useTrackr.getState().notify('acc_synced');

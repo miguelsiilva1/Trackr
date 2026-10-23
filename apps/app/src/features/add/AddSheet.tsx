@@ -1,10 +1,11 @@
 import { useMemo, useState } from 'react';
 import { ActivityIndicator, Pressable, TextInput, View } from 'react-native';
 import { Check, Plus, Search, Star, Wifi, WifiOff } from 'lucide-react-native';
-import { MOCK_CATALOG, libKey } from '@trackr/core';
+import { MOCK_CATALOG, canReach, libKey } from '@trackr/core';
 import { useApp } from '@/providers/AppProviders';
 import { useTrackr } from '@/store/useTrackr';
 import { useMediaSearch } from '@/hooks/useMediaSearch';
+import { useCatalogAccess } from '@/hooks/useCatalogAccess';
 import { closeModal } from '@/lib/navigation';
 import { Sheet } from '@/components/Sheet';
 import { Poster } from '@/components/Poster';
@@ -14,13 +15,14 @@ import { Kicker, Txt } from '@/components/Txt';
 export function AddSheet() {
   const { t, colors } = useApp();
   const items = useTrackr(s => s.items);
-  const keys = useTrackr(s => s.keys);
+  const access = useCatalogAccess();
   const addItem = useTrackr(s => s.addItem);
   const [query, setQuery] = useState('');
   const { outcome, isLoading, debounced } = useMediaSearch(query, MOCK_CATALOG);
   const owned = useMemo(() => new Set(items.map(libKey)), [items]);
   const results = debounced.length >= 2 ? outcome?.items ?? [] : MOCK_CATALOG;
-  const live = !!(keys.tmdb || keys.rawg);
+  const sources = (['tmdb', 'rawg'] as const).filter(api => canReach(api, access)).map(api => api.toUpperCase());
+  const live = sources.length > 0;
 
   return (
     <Sheet onClose={closeModal} title={t('track_item')}>
@@ -36,7 +38,7 @@ export function AddSheet() {
         <View className="flex-row items-center gap-1.5">
           {live ? <Wifi size={12} color={colors.media.game} /> : <WifiOff size={12} color={colors.subtle} />}
           <Txt className="text-xs text-subtle">
-            {live ? t('live_search', { s: [keys.tmdb && 'TMDB', keys.rawg && 'RAWG'].filter(Boolean).join(' + ') }) : t('mock_hint')}
+            {live ? t('live_search', { s: sources.join(' + ') }) : t('mock_hint')}
           </Txt>
         </View>
         {outcome?.warnings.length ? <Txt className="text-xs text-movie">{outcome.warnings.join(' · ')} — {t('using_local')}</Txt> : null}

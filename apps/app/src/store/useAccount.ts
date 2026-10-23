@@ -13,6 +13,8 @@ interface AccountState {
   /** `off` = no backend configured. */
   status: 'off' | 'loading' | 'signed_out' | 'signed_in';
   profile: Profile | null;
+  /** Current session JWT, kept fresh across token refreshes; used for the catalog proxy. */
+  accessToken: string | null;
   signIn: (email: string, password: string) => Promise<void>;
   /** Resolves `confirm_email` when the project requires email confirmation before the first sign-in. */
   signUp: (email: string, password: string, username: string) => Promise<'signed_in' | 'confirm_email'>;
@@ -31,6 +33,7 @@ export const useAccount = create<AccountState>()((set, get) => {
 
   // Fires once with the stored session, then on every sign-in/out. Supabase calls must not run inside the callback itself.
   supabase?.auth.onAuthStateChange((event, session) => {
+    set({ accessToken: session?.access_token ?? null });
     setTimeout(() => {
       // Clear only once the session is really gone and the profile is null, so the cloud hook has stopped.
       void load(session).then(() => {
@@ -42,6 +45,7 @@ export const useAccount = create<AccountState>()((set, get) => {
   return {
     status: supabase ? 'loading' : 'off',
     profile: null,
+    accessToken: null,
 
     signIn: async (email, password) => {
       const { error } = await supabase!.auth.signInWithPassword({ email, password });

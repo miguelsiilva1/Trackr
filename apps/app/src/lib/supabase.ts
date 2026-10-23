@@ -5,6 +5,9 @@ import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 const url = process.env.EXPO_PUBLIC_SUPABASE_URL;
 const key = process.env.EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
 
+/** TMDB/RAWG proxy (Edge Function `catalog`) that holds the API keys server-side. */
+export const CATALOG_PROXY_URL = url ? `${url}/functions/v1/catalog` : undefined;
+
 /** Null when no backend is configured; the app then runs device-only. */
 export const supabase: SupabaseClient | null = url && key
   ? createClient(url, key, {
