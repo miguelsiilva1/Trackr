@@ -27,8 +27,9 @@ create policy "public profiles' events are readable" on public.feed_events
 
 create index library_items_key on public.library_items (key);
 
--- How many users gave each rating to one title. Counts public profiles only, and returns
--- nothing below 5 ratings so a small histogram can't reveal one person's rating.
+-- How many users gave each rating to one title. Counts public profiles only (whose activity is
+-- already public), never the caller, and returns nothing below 10 ratings so a small histogram
+-- can't single anyone out. Sign-up captcha keeps sock-puppet padding expensive.
 create function public.rating_histogram(item_key text)
 returns table (rating numeric, n bigint)
 language sql stable security definer set search_path = '' as $$
@@ -36,10 +37,10 @@ language sql stable security definer set search_path = '' as $$
     select (l.item ->> 'myRating')::numeric as rating
     from public.library_items l
     join public.profiles p on p.id = l.user_id and p.is_public
-    where l.key = item_key and jsonb_typeof(l.item -> 'myRating') = 'number'
+    where l.key = item_key and l.user_id <> auth.uid() and jsonb_typeof(l.item -> 'myRating') = 'number'
   )
   select rating, count(*) from rated
-  where (select count(*) from rated) >= 5
+  where (select count(*) from rated) >= 10
   group by rating
 $$;
 
